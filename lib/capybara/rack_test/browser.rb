@@ -43,7 +43,6 @@ class Capybara::RackTest::Browser
 
   def process(method, path, attributes = {})
     new_uri = URI.parse(path)
-    current_uri = URI.parse(current_url)
 
     if new_uri.host
       @current_host = new_uri.scheme + '://' + new_uri.host
@@ -59,6 +58,13 @@ class Capybara::RackTest::Browser
     end
 
     reset_cache!
+
+    if options[:headers]
+      options[:headers].each do |key, value|
+        header(key, value) unless @headers.has_key?(key)
+      end
+    end
+
     send(method, path, attributes, env)
   end
 
@@ -114,7 +120,7 @@ protected
     rescue Rack::Test::Error
       # no request yet
     end
-    env.merge!(options[:headers]) if options[:headers]
+
     env
   end
 
